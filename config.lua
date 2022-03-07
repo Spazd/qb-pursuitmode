@@ -5,8 +5,7 @@ Config.KeyBind = 74
 
 --you are able to add more just copy and replace with the pd cars you are useing 
 Config.VehiclesConfig = {
-    [1] = {
-        ["model"] = 1912215274,  --defult police3
+    [1912215274] = {
         ["A"] = {
             ["fDriveInertia"] = 1.000000,
             ["fBrakeForce"] = 1.700000,
@@ -27,6 +26,6 @@ Config.VehiclesConfig = {
             ["fInitialDriveMaxFlatVel"] = 180.000000,
             ["fSteeringLock"] = 48.300000,
             ["fInitialDriveForce"] = 0.300000
-        },
+        }
     },
 }

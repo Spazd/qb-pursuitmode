@@ -2,92 +2,94 @@ local QBCore = exports["qb-core"]:GetCoreObject()
 local currentClass = "A"
 local vaildveh = false
 local player = QBCore.Functions.GetPlayerData()
-PlayerJob = {}
+local PlayerJob = {}
 PlayerJob = player.job
+local IsThreadActive = false
 
 
-CreateThread(function()
-    while true do
-        local plyPed = PlayerPedId()
-            if IsPedInAnyVehicle(PlayerPedId(), false) then
-                    local plyVehicle = GetVehiclePedIsIn(plyPed)
-                    if validVehicle(GetEntityModel(plyVehicle)) and DoesEntityExist(plyVehicle) then
-                        if PlayerJob and PlayerJob.name == "police" then
-                            vaildveh = true
-                            SetVehicleHandlingFloat(plyVehicle, "CHandlingData", "fDriveInertia", getHandlingConfig(GetEntityModel(plyVehicle), "fDriveInertia"))
-                            SetVehicleHandlingFloat(plyVehicle, "CHandlingData", "fInitialDriveMaxFlatVel", getHandlingConfig(GetEntityModel(plyVehicle), "fInitialDriveMaxFlatVel"))
-                            SetVehicleHandlingFloat(plyVehicle, "CHandlingData", "fBrakeForce", getHandlingConfig(GetEntityModel(plyVehicle), "fBrakeForce"))
-                            SetVehicleHandlingFloat(plyVehicle, "CHandlingData", "fSteeringLock", getHandlingConfig(GetEntityModel(plyVehicle), "fSteeringLock"))
-                            SetVehicleHandlingFloat(plyVehicle, "CHandlingData", "fInitialDriveForce", getHandlingConfig(GetEntityModel(plyVehicle), "fInitialDriveForce"))
-                            if IsControlPressed(0, Config.KeyBind) then
-                                changeClass()
-                                QBCore.Functions.Notify("Changed class to " .. currentClass)
-                                SetVehicleHandlingFloat(plyVehicle, "CHandlingData", "fDriveInertia", getHandlingConfig(GetEntityModel(plyVehicle), "fDriveInertia"))
-                                SetVehicleHandlingFloat(plyVehicle, "CHandlingData", "fInitialDriveMaxFlatVel", getHandlingConfig(GetEntityModel(plyVehicle), "fInitialDriveMaxFlatVel"))
-                                SetVehicleHandlingFloat(plyVehicle, "CHandlingData", "fBrakeForce", getHandlingConfig(GetEntityModel(plyVehicle), "fBrakeForce"))
-                                SetVehicleHandlingFloat(plyVehicle, "CHandlingData", "fSteeringLock", getHandlingConfig(GetEntityModel(plyVehicle), "fSteeringLock"))
-                                SetVehicleHandlingFloat(plyVehicle, "CHandlingData", "fInitialDriveForce", getHandlingConfig(GetEntityModel(plyVehicle), "fInitialDriveForce"))
-                            end
-                        else
-                            vaildveh = false
-                            Wait(10000)
-                        end
-
-                    end      
-                        else
-                            vaildveh = false
-                            currentClass = "A"
-                        end
-        
-        Wait(1000)
-    end
-end)
-
-
-
-
-RegisterCommand("carhash", function()
-    print(GetEntityModel(GetVehiclePedIsIn(PlayerPedId(), -1)))
-end)
-
-
-
-function validVehicle(vehicleModel)
-    for k,v in pairs(Config.VehiclesConfig) do
-        if Config.VehiclesConfig[k]["model"] == vehicleModel then
-            return true
-        end
-    end
-
-    return false
+local function validVehicle(vehicleModel)
+    local isValid = false
+    if Config.VehiclesConfig[vehicleModel] then isValid = true end
+    return isValid
 end
 
-
-function getHandlingConfig(vehicleModel, type)
-    for k,v in pairs(Config.VehiclesConfig) do
-        if Config.VehiclesConfig[k]["model"] == vehicleModel then
-            return Config.VehiclesConfig[k][currentClass][type]
-        end
+local function getHandlingConfig(vehicleModel)
+    if Config.VehiclesConfig[vehicleModel] then
+        return Config.VehiclesConfig[vehicleModel][currentClass]
     end
 end
 
-function changeClass()
+local function changeClass()
+    local vehicle = GetVehiclePedIsIn(PlayerPedId())
     if currentClass == "A" then
         currentClass = "A+"
-        print("its working!")
     elseif currentClass == "A+" then
         currentClass = "S+"
-        SetVehicleModKit(GetVehiclePedIsIn(PlayerPedId()), 0)
-        ToggleVehicleMod(GetVehiclePedIsIn(PlayerPedId()), 22, true)
-        ToggleVehicleMod(GetVehiclePedIsIn(PlayerPedId()), 18, true) 
-        SetVehicleMod(GetVehiclePedIsIn(PlayerPedId()), 11, 2, false) 
-        SetVehicleXenonLightsColor(GetVehiclePedIsIn(PlayerPedId()), 1) 
-        print("its working!")
+        SetVehicleModKit(vehicle, 0)
+        ToggleVehicleMod(vehicle, 22, true)
+        ToggleVehicleMod(vehicle, 18, true)
+        SetVehicleMod(vehicle, 11, 2, false)
+        SetVehicleXenonLightsColor(vehicle, 1)
     elseif currentClass == "S+" then
         currentClass = "A"
-        ToggleVehicleMod(GetVehiclePedIsIn(PlayerPedId()), 22, false) 
-        ToggleVehicleMod(GetVehiclePedIsIn(PlayerPedId()), 18, false) 
-        SetVehicleMod(GetVehiclePedIsIn(PlayerPedId()), 11, -1, false) 
-       print("its working!")
+        ToggleVehicleMod(vehicle, 22, false)
+        ToggleVehicleMod(vehicle, 18, false)
+        SetVehicleMod(vehicle, 11, -1, false)
     end
 end
+
+local updateHandliong = function(vehicle)
+    for k,v in piars(getHandlingConfig(GetEntityModel(vehicle))) do
+        SetVehicleHandlingFloat(vehicle, "CHandlingData", k, v)
+    end
+end
+
+local handlingThread = function()
+    CreateThread(function()
+        while IsThreadActive do
+            local Sleeper = 1000
+            local plyPed = PlayerPedId()
+            if IsPedInAnyVehicle(plyPed, false) then
+                local plyVehicle = GetVehiclePedIsIn(plyPed)
+                if DoesEntityExist(plyVehicle) and validVehicle(GetEntityModel(plyVehicle)) then
+                    vaildveh = true
+                    updateHandliong(plyVehicle)
+                    if IsControlPressed(0, Config.KeyBind) then
+                        changeClass()
+                        QBCore.Functions.Notify(("Changed class to %s"):format(currentClass))
+                        updateHandliong(plyVehicle)
+                    end
+                    Sleeper = 2
+                end
+            else
+                vaildveh = false
+                currentClass = "A"
+            end
+            Wait(Sleeper)
+        end
+    end)
+end
+
+RegisterNetEvent('QBCore:Client:OnJobUpdate', function(JobInfo)
+    PlayerJob = JobInfo
+    if JobInfo.name == 'police' then
+        IsThreadActive = true
+        handlingThread()
+    else 
+        IsThreadActive = false
+    end
+end)
+
+RegisterNetEvent('QBCore:Client:OnPlayerLoaded', function()
+    player = QBCore.Functions.GetPlayerData()
+    if player.job.name == "police" then
+        IsThreadActive = true
+        handlingThread()
+    else 
+        IsThreadActive = false
+    end
+end)
+
+RegisterCommand("carhash", function()
+    print(('^6[^3qb-pursuitmode^6]^0: Vehicle Hash "%s"'):format(GetEntityModel(GetVehiclePedIsIn(PlayerPedId(), -1))))
+end)
