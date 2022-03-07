@@ -4,6 +4,8 @@ local vaildveh = false
 local player = QBCore.Functions.GetPlayerData()
 local PlayerJob = {}
 PlayerJob = player.job
+local IsThreadActive = false
+
 
 local function validVehicle(vehicleModel)
     local isValid = false
@@ -42,35 +44,52 @@ local updateHandliong = function(vehicle)
     end
 end
 
-CreateThread(function()
-    while true do
-        local Sleeper = 1000
-        local plyPed = PlayerPedId()
-        if IsPedInAnyVehicle(PlayerPedId(), false) then
-            local plyVehicle = GetVehiclePedIsIn(plyPed)
-            if DoesEntityExist(plyVehicle) and validVehicle(GetEntityModel(plyVehicle)) then
-                if PlayerJob and PlayerJob.name == "police" then
+local handlingThread = function()
+    CreateThread(function()
+        while IsThreadActive do
+            local Sleeper = 1000
+            local plyPed = PlayerPedId()
+            if IsPedInAnyVehicle(plyPed, false) then
+                local plyVehicle = GetVehiclePedIsIn(plyPed)
+                if DoesEntityExist(plyVehicle) and validVehicle(GetEntityModel(plyVehicle)) then
                     vaildveh = true
                     updateHandliong(plyVehicle)
                     if IsControlPressed(0, Config.KeyBind) then
                         changeClass()
-                        QBCore.Functions.Notify("Changed class to " .. currentClass)
+                        QBCore.Functions.Notify(("Changed class to %s"):format(currentClass))
                         updateHandliong(plyVehicle)
                     end
-                else
-                    vaildveh = false
-                    currentClass = "A"
-                    Sleeper = 10000
+                    Sleeper = 2
                 end
+            else
+                vaildveh = false
+                currentClass = "A"
             end
-        else
-            vaildveh = false
-            currentClass = "A"
+            Wait(Sleeper)
         end
-        Wait(Sleeper)
+    end)
+end
+
+RegisterNetEvent('QBCore:Client:OnJobUpdate', function(JobInfo)
+    PlayerJob = JobInfo
+    if JobInfo.name == 'police' then
+        IsThreadActive = true
+        handlingThread()
+    else 
+        IsThreadActive = false
+    end
+end)
+
+RegisterNetEvent('QBCore:Client:OnPlayerLoaded', function()
+    player = QBCore.Functions.GetPlayerData()
+    if player.job.name == "police" then
+        IsThreadActive = true
+        handlingThread()
+    else 
+        IsThreadActive = false
     end
 end)
 
 RegisterCommand("carhash", function()
-    print(GetEntityModel(GetVehiclePedIsIn(PlayerPedId(), -1)))
+    print(('^6[^3qb-pursuitmode^6]^0: Vehicle Hash "%s"'):format(GetEntityModel(GetVehiclePedIsIn(PlayerPedId(), -1))))
 end)
