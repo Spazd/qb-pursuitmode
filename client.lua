@@ -39,7 +39,7 @@ local function changeClass()
 end
 
 local updateHandliong = function(vehicle)
-    for k,v in piars(getHandlingConfig(GetEntityModel(vehicle))) do
+    for k,v in pairs(getHandlingConfig(GetEntityModel(vehicle))) do
         SetVehicleHandlingFloat(vehicle, "CHandlingData", k, v)
     end
 end
