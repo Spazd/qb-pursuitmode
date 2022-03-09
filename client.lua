@@ -59,7 +59,7 @@ local handlingThread = function()
                         QBCore.Functions.Notify(("Changed class to %s"):format(currentClass))
                         updateHandliong(plyVehicle)
                     end
-                    Sleeper = 2
+                    Sleeper = 200
                 end
             else
                 vaildveh = false
