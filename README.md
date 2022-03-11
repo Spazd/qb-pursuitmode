@@ -1,17 +1,24 @@
 # qb-pursuitmode
 A client side script that allows to switch between vehicle modes.
-All modes are fully configurable.
 
-### How to Install
+All modes and cars are fully configurable.
 
-1. Drag n Drop the resource
-2. Move the sound file from the sound folder to [standalone]/interact-sound/client/html/sounds/
+## Dependencies
+- [qb-core](https://github.com/qbcore-framework/qb-core)
+- [interact-sound](https://github.com/qbcore-framework/interact-sound)
 
-#### exports: 
-    GetVehicleMode
+## Installation
+- Download the script and put it in the `[qb]` directory.
+- Add the following code to your server.cfg somewhere after 'ensure qb-core'
+```
+ensure qb-pursuitmode
+```
+
+## Exports 
+- GetVehicleMode
  
- #### events:
-    qb-pursuitmode:vehicleModeChanged
+ ## Events
+ - qb-pursuitmode:vehicleModeChanged
     
  
   
