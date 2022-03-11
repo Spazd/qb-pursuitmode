@@ -3,8 +3,7 @@ local QBCore = exports["qb-core"]:GetCoreObject()
 local gear = 1
 local currentVehicle = 0
 local currentVehicleMode = Config.VehicleModes[1]
-local player = nil
-local PlayerJob = {['name'] = 'unemployed'}
+local playerJob = {['name'] = 'unemployed'}
 local hashModelMap = {}
 
 function GetVehicleMode()
@@ -115,11 +114,11 @@ local function updateHandling(vehicle)
         handlingConfig = getGeneralHandlingConfig()
     end
     for k,v in pairs(handlingConfig) do
-        if math.type(v == 'float') then
+        if math.type(v) == 'float' then
             SetVehicleHandlingFloat(vehicle, "CHandlingData", k, v)
-        elseif math.type(v == 'integer') then
+        elseif math.type(v) == 'integer' then
             SetVehicleHandlingInt(vehicle, "CHandlingData", k, v)
-        elseif type(v == 'vector3') then
+        elseif type(v) == 'vector3' then
             SetVehicleHandlingVector(vehicle, "CHandlingData", k, v)
         end
     end
@@ -153,8 +152,8 @@ local function changeVehicleMode(vehicle)
 end
 
 local function updatePlayerInfo()
-    player = QBCore.Functions.GetPlayerData()
-    PlayerJob = player.job
+    local playerData = QBCore.Functions.GetPlayerData()
+    playerJob = playerData.job
 end
 
 local function isAuthorizedToSwitchMode()
@@ -162,7 +161,7 @@ local function isAuthorizedToSwitchMode()
         return true
     end
     for i, v in ipairs(Config.AuthorizedJobs) do
-        if PlayerJob.name == v then
+        if playerJob.name == v then
             return true
         end
     end
@@ -209,7 +208,7 @@ AddEventHandler('onClientResourceStart', function (resourceName)
 end)
 
 RegisterNetEvent('QBCore:Client:OnJobUpdate', function(JobInfo)
-    PlayerJob = JobInfo
+    playerJob = JobInfo
 end)
 
 RegisterNetEvent('QBCore:Client:OnPlayerLoaded', function()
