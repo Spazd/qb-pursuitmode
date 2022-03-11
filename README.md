@@ -27,7 +27,9 @@ ensure qb-pursuitmode
  ## Events
  - qb-pursuitmode:vehicleModeChanged
     
+ ## Credits
  
-  
-  
-  
+ Originally Forked from https://github.com/Spazd/qb-pursuitmode
+ 
+ Big thanks to [Spazd](https://github.com/Spazd) and [uShifty](https://github.com/uShifty) who initially created this script and allowed me to release this on my Github!
+ 
