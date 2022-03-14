@@ -9,6 +9,7 @@ All vehicle modes, cars, handling, upgrades, message, sound, and more are fully 
 
 ## Installation
 - Download the script and put it in the `[qb]` directory.
+- Move the sound file from the sound directory to [standalone]/interact-sound/client/html/sounds
 - Add the following code to your server.cfg somewhere after 'ensure qb-core'
 ```
 ensure qb-pursuitmode
